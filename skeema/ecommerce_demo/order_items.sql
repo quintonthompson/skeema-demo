@@ -4,6 +4,7 @@ CREATE TABLE `order_items` (
   `product_id` int NOT NULL,
   `quantity` int NOT NULL,
   `price_at_time` decimal(10,2) NOT NULL,
+  `test` int NOT NULL,
   PRIMARY KEY (`order_item_id`),
   KEY `order_id` (`order_id`),
   KEY `product_id` (`product_id`),
