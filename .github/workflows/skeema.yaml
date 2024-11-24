@@ -1,0 +1,27 @@
+name: Skeema
+on: 
+  pull_request:
+    types: [opened]
+
+jobs:
+    skeema_diff:
+        runs-on: ubuntu-24.04
+        services:
+            mysql:
+              image: mysql:8.0
+              env:
+                MYSQL_ROOT_PASSWORD: root
+              ports:
+                - 3306:3306
+              options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        steps:
+            - name: install skeema
+              run: |
+                curl -LO https://github.com/skeema/skeema/releases/latest/download/skeema_amd64.deb
+                sudo apt install ./skeema_amd64.deb
+            - uses: actions/checkout@v2
+              with: 
+                ref: ${{ github.event.pull_request.base.sha }}
+            - name: push master schema to MySQL
+              run: |
+                skeema push --password=root github
