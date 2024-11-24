@@ -15,7 +15,7 @@ host=localhost
 port=3306
 password=root
 
-[github]
+[ci]
 host=localhost
 port=3306
 password=root
