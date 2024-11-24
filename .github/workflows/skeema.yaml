@@ -6,6 +6,9 @@ on:
 jobs:
     skeema_diff:
         runs-on: ubuntu-24.04
+        permissions:
+          issues: write
+          pull-requests: write
         services:
             mysql:
               image: mysql:8.0
