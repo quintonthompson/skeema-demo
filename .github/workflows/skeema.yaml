@@ -24,7 +24,7 @@ jobs:
                 ref: ${{ github.event.pull_request.base.sha }}
             - name: push master schema to MySQL
               run: |
-                skeema push ci --skip-lint --skip-verify --password=""
+                skeema push ci --password="" --skip-lint --skip-verify
             - uses: actions/checkout@v2
               with: 
                 ref: ${{ github.event.pull_request.head.sha }}
