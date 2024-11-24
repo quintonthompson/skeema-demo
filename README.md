@@ -10,7 +10,13 @@
 ### Configure local environment
 -  Use `skeema add-environment development` to configure the connection information for your dev environment(s): `skeema add-environment development -h localhost -S /var/run/mysqld/mysqld.sock`
 
-### Configure more environments
+### Diffing locally
+- To diff your local changes run the following: `skeema diff development`
+
+### Applying locally
+- To apply your changes to local run the following: `skeema push development`
+
+## Configure environments
 - Use `skeema add-environment <environment>` to configure a new environment: `skeema add-environment <environment> -h localhost`
 
 ## Importing Schemas
