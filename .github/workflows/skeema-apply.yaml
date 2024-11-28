@@ -14,11 +14,14 @@ jobs:
         permissions:
           issues: write
           pull-requests: write
+          contents: 'read'
+          id-token: 'write'    
         steps:
           - id: auth
             name: Authenticate to Google Cloud
             uses: google-github-actions/auth@v2
             with:
+              token_format: "access_token"
               create_credentials_file: true
               workload_identity_provider: '${{ vars.WORKLOAD_IDENTITY_PROVIDER }}'
               service_account: '${{ vars.SERVICE_ACCOUNT }}'
