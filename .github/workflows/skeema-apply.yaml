@@ -1,0 +1,46 @@
+
+name: Skeema
+on: 
+  pull_request:
+    types: 
+        - closed
+    branches:
+        - main
+
+jobs:
+    skeema_diff:
+        if: github.event.pull_request.merged == true
+        runs-on: ubuntu-24.04
+        permissions:
+          issues: write
+          pull-requests: write
+        steps:
+          - id: auth
+            name: Authenticate to Google Cloud
+            uses: google-github-actions/auth@v2
+            with:
+              create_credentials_file: true
+              workload_identity_provider: '${{ vars.WORKLOAD_IDENTITY_PROVIDER }}'
+              service_account: '${{ vars.SERVICE_ACCOUNT }}'
+          - name: Set up Cloud SDK
+            uses: google-github-actions/setup-gcloud@v2
+          - name: set credentials file
+            run: >-
+              gcloud auth login
+              --cred-file=${{steps.auth.outputs.credentials_file_path}}
+          - name: Download Cloud SQL Proxy
+            run: |
+              wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+              chmod +x cloud_sql_proxy
+      
+          - name: Start Cloud SQL Proxy
+            run: |
+              docker run -d \\
+              -p 127.0.0.1:3306:3306 \\
+              gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1 \\
+              --address 0.0.0.0 --port 3306 \\
+              my-kubernetes-codelab-441306:us-central1:skeema-demo
+      
+ 
+
+

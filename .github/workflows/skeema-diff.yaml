@@ -1,0 +1,50 @@
+name: Skeema
+on: 
+  pull_request:
+    types: [opened]
+
+jobs:
+    skeema_diff:
+        runs-on: ubuntu-24.04
+        permissions:
+          issues: write
+          pull-requests: write
+        services:
+            mysql:
+              image: mysql:8.0
+              env:
+                MYSQL_ALLOW_EMPTY_PASSWORD: 1
+              ports:
+                - 3306:3306
+              options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        steps:
+            - name: install skeema
+              run: |
+                curl -LO https://github.com/skeema/skeema/releases/latest/download/skeema_amd64.deb
+                sudo apt install ./skeema_amd64.deb
+            - uses: actions/checkout@v2
+              with: 
+                ref: ${{ github.event.pull_request.base.sha }}
+            - name: push master schema to MySQL
+              run: |
+                skeema push ci --password="" --skip-lint --skip-verify
+            - uses: actions/checkout@v2
+              with: 
+                ref: ${{ github.event.pull_request.head.sha }}
+            - name: skeema diff
+              run: |
+                skeema push ci --password="" --allow-unsafe --ddl-wrapper='echo "\n-- skeema:ddl:begin\n"{DDL}"\n-- skeema:ddl:end"' | sed -e 's/^USE /-- skeema:ddl:use /g' | sed -n '/^-- skeema:ddl:use /p;/^-- skeema:ddl:begin/,/^-- skeema:ddl:end/p' | tee skeema-diff.sql
+            - name: pr comment
+              uses: actions/github-script@v5
+              with:
+                github-token: ${{secrets.GITHUB_TOKEN}}
+                script: |
+                  const fs = require('fs');
+                  const diff = fs.readFileSync('skeema-diff.sql', 'utf8');
+                  github.rest.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: diff,
+                  })  
+            
